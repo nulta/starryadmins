@@ -1,37 +1,42 @@
-local THEME_COLOR = Color(41, 255, 180)
-local SUCCESS_COLOR = Color(0, 200, 100)
+local MINT = Color(41, 255, 180)
+local GREEN = Color(0, 200, 100)
+local WHITE = color_white
 
 local loadCount = 0
 
 
--- Unprotected load function
-local function load(filename)
+-- Load the file
+local function load(name)
     local startingTime = SysTime()
-    MsgC(THEME_COLOR, "[Starry] ", color_white, "Loading ", THEME_COLOR, filename, color_white, "... ")
+    local filename = "starryadmins/" .. name .. ".lua"
 
-    filename = "starryadmins/" .. filename .. ".lua"
-
-    if string.StartWith(filename, "sv_") and SERVER then
-        -- Serverside file
+    -- Serverside file (sv)
+    if string.StartWith(name, "sv_") and SERVER then
+        MsgC(MINT, "[Starry] ", WHITE, "Loading ", MINT, name, WHITE, "... ")
         include(filename)
-    elseif string.StartWith(filename, "cl_") then
-        -- Clientside file
+
+    -- Clientside file (cl)
+    elseif string.StartWith(name, "cl_") then
         if CLIENT then
+            MsgC(MINT, "[Starry] ", WHITE, "Loading ", MINT, name, WHITE, "... ")
             include(filename)
         else
+            MsgC(MINT, "[Starry] ", WHITE, "Sending ", MINT, name, WHITE, "... ")
             AddCSLuaFile(filename)
         end
+
+    -- Shared file (sh, no prefix)
     else
-        -- Shared file (no prefix)
+        MsgC(MINT, "[Starry] ", WHITE, "Loading ", MINT, name, WHITE, "... ")
         AddCSLuaFile(filename)
         include(filename)
     end
 
-    MsgC(SUCCESS_COLOR, math.Round((SysTime() - startingTime) * 1000, 1), "ms\n")
+    MsgC(GREEN, math.Round((SysTime() - startingTime) * 1000, 1), "ms\n")
     loadCount = loadCount + 1
 end
 
--- Load modules (protected call)
+-- Load modules
 local function loadModules()
     local modules = file.Find("starryadmins/modules/*.lua", "LUA")
 
@@ -42,13 +47,32 @@ local function loadModules()
     end
 end
 
+-- AddCSLuaFile for all the directory
+local function addCSDirectory(directory)
+    if CLIENT then return end
+    local startingTime = SysTime()
 
-MsgC(THEME_COLOR, "StarryAdmins ", color_white, "- Starting ", SERVER and "server" or "client", "\n")
+    MsgC(MINT, "[Starry] ", WHITE, "Sending ", MINT, directory .. "/*", WHITE, "... ")
+    local files = file.Find("starryadmins/" .. directory .. "/*.lua", "LUA")
+
+    for _, filename in pairs(files) do
+        AddCSLuaFile("starryadmins/" .. directory .. "/" .. filename)
+    end
+
+    MsgC(GREEN, math.Round((SysTime() - startingTime) * 1000, 1), "ms\n")
+    loadCount = loadCount + 1
+end
+
+-------------------------------------------------------------------------------
+
+MsgC(MINT, "StarryAdmins ", WHITE, "- Starting ", SERVER and "server" or "client", "\n")
 load "sh_init"
+load "cl_i18n"
+addCSDirectory "langs"
 
-MsgC(THEME_COLOR, "[      ] \n")
-MsgC(THEME_COLOR, "[Starry] ", color_white, "Now loading ", THEME_COLOR, "External Modules", color_white, "..! \n")
+MsgC(MINT, "[      ] \n")
+MsgC(MINT, "[Starry] ", WHITE, "Now loading ", MINT, "External Modules", WHITE, "..! \n")
 loadModules()
 
-MsgC(THEME_COLOR, "[      ] \n")
-MsgC(THEME_COLOR, "[Starry] ", color_white, "Done! loaded ", THEME_COLOR, loadCount, color_white, " files\n")
+MsgC(MINT, "[      ] \n")
+MsgC(MINT, "[Starry] ", WHITE, "Done! Processed total ", MINT, loadCount, WHITE, " files\n")
