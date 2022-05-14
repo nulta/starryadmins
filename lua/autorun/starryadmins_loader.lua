@@ -1,23 +1,56 @@
 
-local function load(filename)
-    filename = "starryadmins/" .. filename .. "lua"
+local THEME_COLOR = Color(41, 255, 180)
+local SUCCESS_COLOR = Color(0, 200, 100)
+local FAILURE_COLOR = Color(200, 0, 0)
 
+local loadCount = 0
+local failCount = 0
+
+
+-- Unprotected load function
+local function load(filename)
+    local startingTime = SysTime()
+    MsgC(THEME_COLOR, "[Starry] ", color_white, "Loading ", THEME_COLOR, filename, color_white, "... ")
+
+    filename = "starryadmins/" .. filename .. "lua"
     if string.StartWith(filename, "sv_") and SERVER then
         include(filename)
-
     elseif string.StartWith(filename, "cl_") then
         if CLIENT then
             include(filename)
         else
             AddCSLuaFile(filename)
         end
-
     else -- Shared
         AddCSLuaFile(filename)
         include(filename)
     end
+
+    MsgC(SUCCESS_COLOR, "OK (", math.floor((SysTime() - startingTime) * 1000), "ms)\n")
+    loadCount = loadCount + 1
+end
+
+-- Load modules (protected call)
+local function loadModules()
+    local modules = file.Find("starryadmins/modules/*.lua", "LUA")
+
+    for _, filename in pairs(modules) do
+        filename = string.gsub(filename, "%.lua$", "")
+        filename = string.gsub(filename, "^starryadmins/", "")
+        local ok = ProtectedCall(function() load(filename) end)
+
+        if not ok then
+            MsgC(THEME_COLOR, "[Starry] ", FAILURE_COLOR, "^ Failed to load module '", filename, "'!", color_white, " continuing...\n")
+            failCount = failCount + 1
+        end
+    end
 end
 
 
+MsgC(THEME_COLOR, "[Starry] ", color_white, "Hello, World!\n")
 load "sh_init"
 
+MsgC(THEME_COLOR, "[Starry] ", color_white, "Now loading ", THEME_COLOR, "External Modules", color_white, "..! \n")
+loadModules()
+
+MsgC(THEME_COLOR, "[Starry] ", color_white, "Done! loaded ", THEME_COLOR, loadCount, color_white, ", failed ", FAILURE_COLOR, failCount, color_white,"\n")
