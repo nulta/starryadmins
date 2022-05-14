@@ -1,7 +1,5 @@
-
 local THEME_COLOR = Color(41, 255, 180)
 local SUCCESS_COLOR = Color(0, 200, 100)
--- local FAILURE_COLOR = Color(200, 0, 0)
 
 local loadCount = 0
 
@@ -12,15 +10,19 @@ local function load(filename)
     MsgC(THEME_COLOR, "[Starry] ", color_white, "Loading ", THEME_COLOR, filename, color_white, "... ")
 
     filename = "starryadmins/" .. filename .. ".lua"
+
     if string.StartWith(filename, "sv_") and SERVER then
+        -- Serverside file
         include(filename)
     elseif string.StartWith(filename, "cl_") then
+        -- Clientside file
         if CLIENT then
             include(filename)
         else
             AddCSLuaFile(filename)
         end
-    else -- Shared
+    else
+        -- Shared file (no prefix)
         AddCSLuaFile(filename)
         include(filename)
     end
