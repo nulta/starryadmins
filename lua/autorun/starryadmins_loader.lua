@@ -1,10 +1,9 @@
 
 local THEME_COLOR = Color(41, 255, 180)
 local SUCCESS_COLOR = Color(0, 200, 100)
-local FAILURE_COLOR = Color(200, 0, 0)
+-- local FAILURE_COLOR = Color(200, 0, 0)
 
 local loadCount = 0
-local failCount = 0
 
 
 -- Unprotected load function
@@ -12,7 +11,7 @@ local function load(filename)
     local startingTime = SysTime()
     MsgC(THEME_COLOR, "[Starry] ", color_white, "Loading ", THEME_COLOR, filename, color_white, "... ")
 
-    filename = "starryadmins/" .. filename .. "lua"
+    filename = "starryadmins/" .. filename .. ".lua"
     if string.StartWith(filename, "sv_") and SERVER then
         include(filename)
     elseif string.StartWith(filename, "cl_") then
@@ -26,7 +25,7 @@ local function load(filename)
         include(filename)
     end
 
-    MsgC(SUCCESS_COLOR, "OK (", math.floor((SysTime() - startingTime) * 1000), "ms)\n")
+    MsgC(SUCCESS_COLOR, math.Round((SysTime() - startingTime) * 1000, 1), "ms\n")
     loadCount = loadCount + 1
 end
 
@@ -36,21 +35,18 @@ local function loadModules()
 
     for _, filename in pairs(modules) do
         filename = string.gsub(filename, "%.lua$", "")
-        filename = string.gsub(filename, "^starryadmins/", "")
-        local ok = ProtectedCall(function() load(filename) end)
-
-        if not ok then
-            MsgC(THEME_COLOR, "[Starry] ", FAILURE_COLOR, "^ Failed to load module '", filename, "'!", color_white, " continuing...\n")
-            failCount = failCount + 1
-        end
+        filename = "modules/" .. filename
+        load(filename)
     end
 end
 
 
-MsgC(THEME_COLOR, "[Starry] ", color_white, "Hello, World!\n")
+MsgC(THEME_COLOR, "StarryAdmins ", color_white, "- Starting ", SERVER and "server" or "client", "\n")
 load "sh_init"
 
+MsgC(THEME_COLOR, "[      ] \n")
 MsgC(THEME_COLOR, "[Starry] ", color_white, "Now loading ", THEME_COLOR, "External Modules", color_white, "..! \n")
 loadModules()
 
-MsgC(THEME_COLOR, "[Starry] ", color_white, "Done! loaded ", THEME_COLOR, loadCount, color_white, ", failed ", FAILURE_COLOR, failCount, color_white,"\n")
+MsgC(THEME_COLOR, "[      ] \n")
+MsgC(THEME_COLOR, "[Starry] ", color_white, "Done! loaded ", THEME_COLOR, loadCount, color_white, " files\n")
