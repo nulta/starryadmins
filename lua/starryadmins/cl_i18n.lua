@@ -6,8 +6,8 @@ local i18n = setmetatable({}, {__call = function(self, ...) return self.translat
 
 -- Usage: StarryAdmins.i18n("translation_key", parameters...)
 StarryAdmins.i18n = i18n
-i18n.dictionary = {}
-i18n.validLanguages = i18n.validLanguages or {}
+StarryAdmins.i18n.dictionary = {}
+StarryAdmins.i18n.validLanguages = i18n.validLanguages or {}
 
 
 --- Load the list of valid languages.
@@ -44,7 +44,7 @@ end)
 
 
 --- Get the current language.
-function i18n.getCurrentLanguage()
+function StarryAdmins.i18n.getCurrentLanguage()
     -- Use starry_language cvar if set
     local lang = overrideLanguage:GetString():Trim()
     if i18n.validLanguages[lang] then
@@ -64,7 +64,7 @@ setLanguage(i18n.getCurrentLanguage())
 
 
 --- Format a string with certain template, like "Hello {1} with {2}".
-function i18n.format(template, ...)
+function StarryAdmins.i18n.format(template, ...)
     local args = {...}
     for i = 1, #args do
         template = string.gsub(template, "{" .. i .. "}", args[i])
@@ -74,7 +74,7 @@ end
 
 
 --- Get the translation data for the given key. Replace {1}, {2}, etc. with the given arguments.
-function i18n.translate(id, ...)
+function StarryAdmins.i18n.translate(id, ...)
     local translation = i18n.dictionary[id]
     if not translation then
         -- No translation data
