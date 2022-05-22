@@ -11,10 +11,11 @@ local function load(name)
     local filename = "starryadmins/" .. name .. ".lua"
 
     -- Serverside file (sv)
-    if string.StartWith(name, "sv_") and SERVER then
-        MsgC(MINT, "[Starry] ", WHITE, "Loading ", MINT, name, WHITE, "... ")
-        include(filename)
-
+    if string.StartWith(name, "sv_") then
+        if SERVER then
+            MsgC(MINT, "[Starry] ", WHITE, "Loading ", MINT, name, WHITE, "... ")
+            include(filename)
+        end
     -- Clientside file (cl)
     elseif string.StartWith(name, "cl_") then
         if CLIENT then
@@ -63,16 +64,21 @@ local function addCSDirectory(directory)
     loadCount = loadCount + 1
 end
 
--------------------------------------------------------------------------------
 
+
+local totalTime = SysTime()
 MsgC(MINT, "StarryAdmins ", WHITE, "- Starting ", SERVER and "server" or "client", "\n")
+
 load "sh_init"
-load "cl_i18n"
 addCSDirectory "langs"
+load "cl_i18n"
+load "sh_networking"
+load "sh_permissions"
+load "sv_permissions"
 
 MsgC(MINT, "[      ] \n")
 MsgC(MINT, "[Starry] ", WHITE, "Now loading ", MINT, "External Modules", WHITE, "..! \n")
 loadModules()
-
 MsgC(MINT, "[      ] \n")
-MsgC(MINT, "[Starry] ", WHITE, "Done! Processed total ", MINT, loadCount, WHITE, " files\n")
+totalTime = math.Round((SysTime() - totalTime) * 1000, 1)
+MsgC(MINT, "[Starry] ", WHITE, "Done! Processed ", MINT, loadCount, WHITE, " files in ", MINT, totalTime, "ms\n")
