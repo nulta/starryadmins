@@ -75,6 +75,7 @@ load "cl_i18n"
 load "sh_networking"
 load "sh_permissions"
 load "sv_permissions"
+load "sh_commands"
 
 MsgC(MINT, "[      ] \n")
 MsgC(MINT, "[Starry] ", WHITE, "Now loading ", MINT, "External Modules", WHITE, "..! \n")

@@ -41,7 +41,7 @@ hook.Add("PlayerInitialSpawn", "Starry.PermissionsAuth", function(ply)
 
 end)
 
--- Testing data
+-- ! Testing data
 do
     StarryAdmins.authorityData = {
         ["superadmin"] = {

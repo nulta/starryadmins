@@ -1,4 +1,3 @@
 return {
-    ["test"] = "Hello, World!",
-    ["test2"] = "Again, Hello, World!",
+    ["command.nodesc"] = "(No description available)",
 }
