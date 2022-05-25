@@ -37,13 +37,14 @@ do
         local function sendNetSync(id, sendTo, dataOwner)
             local syncData = netsync.registered[id]
             local value = syncData.isPlayerData and player[syncData.tableName] or StarryAdmins[syncData.tableName]
-            local compressedValue = util.TableToJSON(value)  --TODO: Will Player be serialized properly?
+            local compressedValue = util.TableToJSON(value or {})  --TODO: Will Player be serialized properly?
             compressedValue = util.Compress(compressedValue)
 
             net.Start("starry_netsync")
                 net.WriteString(id)
                 net.WriteEntity(dataOwner) -- nullable
-                net.WriteString(compressedValue)
+                net.WriteUInt(#compressedValue, 32)
+                net.WriteData(compressedValue)
             if sendTo then
                 net.Send(sendTo)
             else
@@ -76,12 +77,14 @@ do
         net.Receive("starry_netsync", function(len)
             local id = net.ReadString()
             local dataOwner = net.ReadEntity() -- nullable
-            local compressedValue = net.ReadString()
+            local compressedSize = net.ReadUInt(32)
+            local compressedValue = net.ReadData(compressedSize)
 
             local syncData = netsync.registered[id]
-            local value = util.JSONToTable(compressedValue)
+            local value = util.Decompress(compressedValue)
+            value = util.JSONToTable(value)
 
-            if dataOwner then
+            if dataOwner ~= Entity(0) then
                 if not dataOwner:IsValid() then return end
                 dataOwner[syncData.tableName] = value
             else
